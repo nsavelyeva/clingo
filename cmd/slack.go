@@ -11,7 +11,7 @@ func newSlack() *cobra.Command {
 	var conf slack.Config
 
 	cmd := &cobra.Command{
-		Use:   "Slack",
+		Use:   "slack",
 		Short: "Prints the Slack config",
 		Long:  "Requires and prints the Slack config",
 		Args:  cobra.NoArgs,

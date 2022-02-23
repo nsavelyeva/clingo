@@ -4,7 +4,7 @@ This project is for learning purpose to study how CLI tools can be written in Go
 using [Cobra](https://github.com/spf13/cobra) and [Viper](https://github.com/spf13/viper).
 
 Inspired by [this article](https://carolynvanslyck.com/blog/2020/08/sting-of-the-viper/)
-and [this fork](https://github.com/carolynvs/stingoftheviper).
+and [this fork](https://github.com/corverroos/stingoftheviper).
 
 To compile the project and generate the executable file:
 ```
