@@ -25,17 +25,20 @@ func TestPrecedence(t *testing.T) {
 	// Set favorite-color with the config file
 	t.Run("config file", func(t *testing.T) {
 		// Copy the config file into our temporary test directory
-		configB, err := ioutil.ReadFile(filepath.Join(testDir, "..", "clingo-conf.toml"))
-		require.NoError(t, err, "error reading test config file")
-		err = ioutil.WriteFile(filepath.Join(tmpDir, "clingo-conf.toml"), configB, 0644)
-		require.NoError(t, err, "error writing test config file")
+		configB, e1 := ioutil.ReadFile(filepath.Join(testDir, "..", "clingo-conf.toml"))
+		require.NoError(t, e1, "error reading test config file")
+		e2 := ioutil.WriteFile(filepath.Join(tmpDir, "clingo-conf.toml"), configB, 0644)
+		require.NoError(t, e2, "error writing test config file")
 		defer os.Remove(filepath.Join(tmpDir, "clingo-conf.toml"))
 
 		// Run ./clingo
 		cmd := NewRootCommand()
 		output := &bytes.Buffer{}
 		cmd.SetOut(output)
-		cmd.Execute()
+		err = cmd.Execute()
+		if err != nil {
+			return
+		}
 
 		gotOutput := output.String()
 		wantOutput := `Your favorite color is: blue
@@ -47,13 +50,18 @@ The magic number is: 7
 	// Set favorite-color with an environment variable
 	t.Run("env var", func(t *testing.T) {
 		// Run CLINGO=purple ./clingo
-		os.Setenv("CLINGO_FAVORITE_COLOR", "purple")
-		defer os.Unsetenv("CLINGO_FAVORITE_COLOR")
+		_ = os.Setenv("CLINGO_FAVORITE_COLOR", "purple")
+		defer func() {
+			_ = os.Unsetenv("CLINGO_FAVORITE_COLOR")
+		}()
 
 		cmd := NewRootCommand()
 		output := &bytes.Buffer{}
 		cmd.SetOut(output)
-		cmd.Execute()
+		err := cmd.Execute()
+		if err != nil {
+			return
+		}
 
 		gotOutput := output.String()
 		wantOutput := `Your favorite color is: purple
@@ -69,7 +77,10 @@ The magic number is: 7
 		output := &bytes.Buffer{}
 		cmd.SetOut(output)
 		cmd.SetArgs([]string{"--number", "2"})
-		cmd.Execute()
+		err := cmd.Execute()
+		if err != nil {
+			return
+		}
 
 		gotOutput := output.String()
 		wantOutput := `Your favorite color is: red

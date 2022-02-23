@@ -3,6 +3,7 @@ package main
 import (
 	"clingo/cmd"
 	_ "clingo/slack"
+
 	"github.com/spf13/cobra"
 )
 

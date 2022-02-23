@@ -43,8 +43,8 @@ func NewRootCommand() *cobra.Command {
 			out := cmd.OutOrStdout()
 
 			// Print the final resolved value from binding cobra flags and viper config
-			fmt.Fprintln(out, "Your favorite color is:", color)
-			fmt.Fprintln(out, "The magic number is:", number)
+			_, _ = fmt.Fprintln(out, "Your favorite color is:", color)
+			_, _ = fmt.Fprintln(out, "The magic number is:", number)
 		},
 	}
 
@@ -103,13 +103,19 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 		// keys with underscores, e.g. --favorite-color to CLINGO_FAVORITE_COLOR
 		if strings.Contains(f.Name, "-") {
 			envVarSuffix := strings.ToUpper(strings.ReplaceAll(f.Name, "-", "_"))
-			v.BindEnv(f.Name, fmt.Sprintf("%s_%s", envPrefix, envVarSuffix))
+			err := v.BindEnv(f.Name, fmt.Sprintf("%s_%s", envPrefix, envVarSuffix))
+			if err != nil {
+				return
+			}
 		}
 
 		// Apply the viper config value to the flag when the flag is not set and viper has a value
 		if !f.Changed && v.IsSet(f.Name) {
 			val := v.Get(f.Name)
-			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			err := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			if err != nil {
+				return
+			}
 		}
 	})
 }
