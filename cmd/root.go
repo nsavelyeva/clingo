@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"clingo/constants"
+	"clingo/helpers"
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -10,13 +14,21 @@ import (
 )
 
 const (
-	// The name of our config file, without the file extension because viper supports many different config file languages.
-	defaultConfigFilename = "clingo-conf"
+	// The name of our config file, without the file extension because viper supports many config file languages.
+	defaultConfigFilename = "clingo-conf"  // it is clingo-conf.toml in the repository root folder
 
 	// The environment variable prefix of all environment variables bound to our command line flags.
 	// For example, --number is bound to CLINGO_NUMBER.
 	envPrefix = "CLINGO"
 )
+
+// EventMetadata is a struct to store metadata about a personal or public event
+type EventMetadata struct {
+	Year   int    `json:"year"`
+	Remind int    `json:"remind"`
+	Type   string `json:"type"`
+	Event  string `json:"event"`
+}
 
 // NewRootCommand builds the cobra command that handles our command line tool.
 func NewRootCommand() *cobra.Command {
@@ -26,34 +38,67 @@ func NewRootCommand() *cobra.Command {
 	// not recommended that you use one-off variables. The point is that we
 	// aren't retrieving the values directly from viper or flags, we read the values
 	// from standard Go data structures.
-	color := ""
-	number := 0
+	events := ""
+	filter := ""
+	output := ""
 
 	// Define our command
 	rootCmd := &cobra.Command{
 		Use:   "clingo",
-		Short: "Cobra and Viper together at last",
-		Long:  `Demonstrate how to get cobra flags to bind to viper properly`,
+		Short: "Check if today is a special day",
+		Long:  `Based on a JSON file, check if today is a special day`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// You can bind cobra and viper in a few locations, but PersistencePreRunE on the root command works well
 			return initializeConfig(cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			content := helpers.ReadJSON(events)
+			var details map[string]EventMetadata
+			err := json.Unmarshal(content, &details)
+			if err != nil {
+				fmt.Printf(`Error loading JSON from "%s": %s`, constants.EventsDefaultJSONFilePath, err)
+			}
+			today := time.Now()
+			// today = time.Date(2022, time.March, 26, 23, 12, 5, 3, time.UTC)
+
+			dt := helpers.GetDayMonth(today, 0)
+			if _, ok := details[dt]; ok && (filter == "" || details[dt].Type == filter) {
+				output += fmt.Sprintf("Today is %d %s %d: %s [%d year(s)]\n",
+					today.Day(), today.Month(), today.Year(),
+					details[dt].Event, today.Year() - details[dt].Year)
+			}
+
+			// Now scan for the upcoming events with reminders
+			for i := 1; i < 10; i++ {
+				dt = helpers.GetDayMonth(today, i)
+				if _, ok := details[dt]; ok {
+					if i <= details[dt].Remind && (filter == "" || details[dt].Type == filter) {
+						output += fmt.Sprintf("In %d day(s) will be %d-%s: %s [%d year(s)]\n",
+							i, today.Year(), dt, details[dt].Event, today.Year() - details[dt].Year)
+					}
+				}
+			}
+
 			// Working with OutOrStdout/OutOrStderr allows us to unit test our command easier
 			out := cmd.OutOrStdout()
 
 			// Print the final resolved value from binding cobra flags and viper config
-			_, _ = fmt.Fprintln(out, "Your favorite color is:", color)
-			_, _ = fmt.Fprintln(out, "The magic number is:", number)
+			_, _ = fmt.Fprint(out, "", output)
 		},
 	}
 
-	// Define cobra flags, the default value has the lowest (least significant) precedence
-	rootCmd.Flags().IntVarP(&number, "number", "n", 7, "What is the magic number?")
-	rootCmd.Flags().StringVarP(&color, "favorite-color", "c", "red", "Should come from flag first, then env var CLINGO_FAVORITE_COLOR then the config file, then the default last")
+	// Define cobra flags, the precedence is as follows:
+	// The path to JSON file with events should come from flag first,
+	// then env var CLINGO_EVENTS,
+	// then the config file,
+	// then the default last.
+	rootCmd.Flags().StringVarP(&events, "events", "e", constants.EventsDefaultJSONFilePath, "Is today a special day?")
+	rootCmd.Flags().StringVarP(&filter, "filter", "f", "", "Filter events by type")
 
 	rootCmd.AddCommand(
-		newSlack(),
+		newWeather(),
+		newCurrency(),
+		newJokes(),
 	)
 
 	return rootCmd

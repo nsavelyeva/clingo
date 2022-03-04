@@ -2,7 +2,7 @@ package main
 
 import (
 	"clingo/cmd"
-	_ "clingo/slack"
+	_ "clingo/weather"
 
 	"github.com/spf13/cobra"
 )

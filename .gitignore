@@ -1,5 +1,7 @@
 /clingo
 tmp-test-clingo*
+debug
+events.json
 
 .idea
 
