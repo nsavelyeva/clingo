@@ -8,3 +8,5 @@ COPY ./clingo /opt/clingo/clingo
 
 RUN chmod a+x /opt/clingo/clingo \
     && ln -s /opt/clingo/clingo /usr/local/bin/clingo
+
+WORKDIR /opt/clingo
