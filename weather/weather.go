@@ -81,7 +81,7 @@ func Run(out io.Writer, conf *ConfigWeather) error {
 		emoji := sw.GetEmoji(records, weather.Current.Condition.Code)
 
 		ms := weather.Current.WindKph * 1000 / 3600
-		fmt.Printf("Weather in %s: %s %s, t %.1fC (feels like %.1fC), wind %s %.2f km/h (%.1f m/s), pressure %.1f mb, humidity %d, UV %.1f\n",
+		fmt.Printf("%s: %s %s, t %.1fC (feels like %.1fC), wind %s %.2f km/h (%.1f m/s), pressure %.1f mb, humidity %d, UV %.1f\n",
 			conf.City, emoji, weather.Current.Condition.Text,
 			weather.Current.TempC, weather.Current.FeelslikeC,
 			weather.Current.WindDir, weather.Current.WindKph, ms,
