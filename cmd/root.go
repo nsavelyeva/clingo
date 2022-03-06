@@ -78,7 +78,9 @@ func NewRootCommand() *cobra.Command {
 					}
 				}
 			}
-
+                        if output == "" {
+                            output = "No events and reminders today"
+                        }
 			// Working with OutOrStdout/OutOrStderr allows us to unit test our command easier
 			out := cmd.OutOrStdout()
 
