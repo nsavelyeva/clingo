@@ -16,7 +16,8 @@ func newWeather() *cobra.Command {
 		Long:  "Request current weather information for the given city",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return weather.Run(cmd.OutOrStdout(), &conf)
+			sw := *weather.NewServiceWeather(conf.City, conf.Token)
+			return weather.Run(cmd.OutOrStdout(), sw)
 		},
 	}
 

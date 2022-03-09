@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"clingo/constants"
 	"clingo/structs"
+	"clingo/test"
 	"fmt"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
@@ -151,55 +152,60 @@ func TestNewServiceWeather(t *testing.T) {
 	}
 }
 
-// TODO: Switch to weather mock
 func TestRun(t *testing.T) {
-	mockBody := `{
-"location":{"name":"city"},
-"current":{"temp_c":1.0,
-  "feelslike_c":0.1,
-  "win_dir":"N",
-  "wind_kph":5.0,
-  "pressure_mb":11.2,
-  "humidity":90,
-  "uv":3.0,
-  "condition":{"text":"mock weather","code":1153}
-  }
-}`
-	wantOutput := "city: :rain_cloud: mock weather, t 1.0C (feels like 0.1C), wind  5.00 km/h (1.4 m/s), pressure 11.2 mb, humidity 90, UV 3.0\n"
+	curDir, e1 := os.Getwd()
+	require.NoError(t, e1, "Cannot get working directory")
 
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-	httpmock.RegisterResponder(
-		"GET",
-		fmt.Sprintf("%s/current.json?key=%s&q=%s&aqi=no", constants.WeatherBaseURL, "token", "city"),
-		httpmock.NewStringResponder(200, mockBody),
-	)
+	mockData := &structs.ResponseWeather{
+		Location: &structs.Location{
+			Name:           "city",
+		},
+		Current:  &structs.Current{
+			TempC:            1.0,
+			Condition:        structs.Condition{Text: "mock weather", Code: 1153},
+			WindKph:          5.0,
+			WindDir:          "N",
+			PressureMb:       11.2,
+			Humidity:         90,
+			FeelslikeC:       0.1,
+			Uv:               3.0,
+		},
+	}
+	wantOutput := "city: :rain_cloud: mock weather, t 1.0C (feels like 0.1C), wind N 5.00 km/h (1.4 m/s), pressure 11.2 mb, humidity 90, UV 3.0\n"
+
 	tests := []struct {
 		name    string
 		city    string
 		token   string
+		mockStatus string
+		mockMessage string
+		mockData structs.ResponseWeather
 		wantOut string
-		wantErr bool
 	}{
-		{"ok", "city", "token", wantOutput, false},
+		{"ok", "city", "token", "200", "", *mockData, wantOutput},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			out := &bytes.Buffer{}
-			conf := ConfigWeather{City: tt.city, Token: tt.token}
 			require.NoError(t,
 				os.Chdir(".."),
-				fmt.Sprintf("error changing to the temporary test directory %s", ".."),
+				fmt.Sprintf("error going up from the current working directory '%s'", curDir),
 			)
 
-			err := Run(out, &conf)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			ws := test.NewServiceWeatherMock(tt.city, tt.token)
+			ws.On("Request").Return(tt.mockStatus, tt.mockMessage, &tt.mockData)
+
+			out := &bytes.Buffer{}
+			err := Run(out, ws)
+			require.NoError(t, err,	fmt.Sprintf("weather.Run() failed with error '%s'", err))
+
 			if gotOut := out.String(); gotOut != tt.wantOut {
 				t.Errorf("Run() gotOut = %v, want %v", gotOut, tt.wantOut)
 			}
+
+			defer require.NoError(t,
+				os.Chdir(curDir),
+				fmt.Sprintf("error going back to the previous working directory '%s'", curDir),
+			)
 		})
 	}
 }

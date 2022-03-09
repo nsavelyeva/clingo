@@ -77,8 +77,9 @@ func GetEmoji(records [][]string, code int) string {
 }
 
 // Run is a function to send an HTTP request to 3rd party Weather API and print the summary in case of success
-func Run(out io.Writer, conf *ConfigWeather) error {
-	sw := *NewServiceWeather(conf.City, conf.Token)
+//func Run(out io.Writer, conf *ConfigWeather) error {
+func Run(out io.Writer, sw ServiceWeather) error {
+	//sw := *NewServiceWeather(conf.City, conf.Token)
 	status, _, weather := sw.Request()
 
 	if strings.HasPrefix(status, "200") {
@@ -87,7 +88,7 @@ func Run(out io.Writer, conf *ConfigWeather) error {
 
 		ms := weather.Current.WindKph * 1000 / 3600
 		output := fmt.Sprintf("%s: %s %s, t %.1fC (feels like %.1fC), wind %s %.2f km/h (%.1f m/s), pressure %.1f mb, humidity %d, UV %.1f\n",
-			conf.City, emoji, weather.Current.Condition.Text,
+			weather.Location.Name, emoji, weather.Current.Condition.Text,
 			weather.Current.TempC, weather.Current.FeelslikeC,
 			weather.Current.WindDir, weather.Current.WindKph, ms,
 			weather.Current.PressureMb, weather.Current.Humidity, weather.Current.Uv)
