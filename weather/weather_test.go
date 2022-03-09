@@ -197,7 +197,7 @@ func TestRun(t *testing.T) {
 
 			out := &bytes.Buffer{}
 			err := Run(out, ws)
-			require.NoError(t, err,	fmt.Sprintf("weather.Run() failed with error '%s'", err))
+			require.NoError(t, err, fmt.Sprintf("weather.Run() failed with error '%s'", err))
 
 			if gotOut := out.String(); gotOut != tt.wantOut {
 				t.Errorf("Run() gotOut = %v, want %v", gotOut, tt.wantOut)
