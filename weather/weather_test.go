@@ -161,7 +161,7 @@ func TestRun(t *testing.T) {
 		Location: &structs.Location{
 			Name: "city",
 		},
-		Current:  &structs.Current{
+		Current: &structs.Current{
 			TempC:      1.0,
 			Condition:  structs.Condition{Text: "mock weather", Code: 1153},
 			WindKph:    5.0,
