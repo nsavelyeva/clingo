@@ -32,8 +32,8 @@ func NewServiceWeather(city string, token string) *ServiceWeather {
 
 // Request is a method to send the HTTP call to the 3rd party weather API
 func (cw *ConfigWeather) Request() (string, string, *structs.ResponseWeather) {
-	weatherUrl := fmt.Sprintf("%s/current.json?key=%s&q=%s&aqi=no", constants.WeatherBaseURL, cw.Token, cw.City)
-	resp, e1 := http.Get(weatherUrl)
+	weatherURL := fmt.Sprintf("%s/current.json?key=%s&q=%s&aqi=no", constants.WeatherBaseURL, cw.Token, cw.City)
+	resp, e1 := http.Get(weatherURL)
 	if e1 != nil {
 		fmt.Printf("Weather request failed: %s\n", e1)
 		return "", fmt.Sprintf("%s", e1), nil
@@ -68,7 +68,7 @@ func (cw *ConfigWeather) Request() (string, string, *structs.ResponseWeather) {
 func GetEmoji(records [][]string, code int) string {
 	emoji := ""
 	for _, value := range records {
-		if value[0] == strconv.Itoa(code)  {
+		if value[0] == strconv.Itoa(code) {
 			emoji = value[4]
 			break
 		}
@@ -77,9 +77,7 @@ func GetEmoji(records [][]string, code int) string {
 }
 
 // Run is a function to send an HTTP request to 3rd party Weather API and print the summary in case of success
-//func Run(out io.Writer, conf *ConfigWeather) error {
 func Run(out io.Writer, sw ServiceWeather) error {
-	//sw := *NewServiceWeather(conf.City, conf.Token)
 	status, _, weather := sw.Request()
 
 	if strings.HasPrefix(status, "200") {

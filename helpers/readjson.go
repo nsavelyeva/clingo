@@ -25,4 +25,3 @@ func ReadJSON(filePath string) []byte {
 
 	return byteValue
 }
-

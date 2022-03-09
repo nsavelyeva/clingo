@@ -2,27 +2,30 @@ package structs
 
 // ResponseWeather is a struct to store successful HTTP response from weather API
 type ResponseWeather struct {
-	Location *Location  `json:"location"`
-	Current  *Current   `json:"current"`
+	Location *Location `json:"location"`
+	Current  *Current  `json:"current"`
 }
 
+// Location is a sub-struct of ResponseWeather struct
 type Location struct {
 	Name           string  `json:"name"`
 	Region         string  `json:"region"`
 	Country        string  `json:"country"`
 	Lat            float64 `json:"lat"`
 	Lon            float64 `json:"lon"`
-	TzId           string  `json:"tz_id"`
+	TzID           string  `json:"tz_id"`
 	LocaltimeEpoch int     `json:"localtime_epoch"`
 	Localtime      string  `json:"localtime"`
 }
 
+// Condition is a sub-struct of Current sub-struct of ResponseWeather struct
 type Condition struct {
 	Text string `json:"text"`
 	Icon string `json:"icon"`
 	Code int    `json:"code"`
 }
 
+// Current is a sub-struct of ResponseWeather struct
 type Current struct {
 	LastUpdatedEpoch int     `json:"last_updated_epoch"`
 	LastUpdated      string  `json:"last_updated"`

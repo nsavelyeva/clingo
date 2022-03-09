@@ -15,7 +15,7 @@ import (
 
 const (
 	// The name of our config file, without the file extension because viper supports many config file languages.
-	defaultConfigFilename = "clingo-conf"  // it is clingo-conf.toml in the repository root folder
+	defaultConfigFilename = "clingo-conf" // it is clingo-conf.toml in the repository root folder
 
 	// The environment variable prefix of all environment variables bound to our command line flags.
 	// For example, --number is bound to CLINGO_NUMBER.
@@ -65,7 +65,7 @@ func NewRootCommand() *cobra.Command {
 			if _, ok := details[dt]; ok && (filter == "" || details[dt].Type == filter) {
 				output += fmt.Sprintf("Today is %d %s %d: %s [%d year(s)]\n",
 					today.Day(), today.Month(), today.Year(),
-					details[dt].Event, today.Year() - details[dt].Year)
+					details[dt].Event, today.Year()-details[dt].Year)
 			}
 
 			// Now scan for the upcoming events with reminders
@@ -74,13 +74,13 @@ func NewRootCommand() *cobra.Command {
 				if _, ok := details[dt]; ok {
 					if i <= details[dt].Remind && (filter == "" || details[dt].Type == filter) {
 						output += fmt.Sprintf("In %d day(s) will be %d-%s: %s [%d year(s)]\n",
-							i, today.Year(), dt, details[dt].Event, today.Year() - details[dt].Year)
+							i, today.Year(), dt, details[dt].Event, today.Year()-details[dt].Year)
 					}
 				}
 			}
-                        if output == "" {
-                            output = "No events today.\nNo reminders today.\n"
-                        }
+			if output == "" {
+			    output = "No events today.\nNo reminders today.\n"
+			}
 			// Working with OutOrStdout/OutOrStderr allows us to unit test our command easier
 			out := cmd.OutOrStdout()
 

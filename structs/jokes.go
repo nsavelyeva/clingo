@@ -14,7 +14,7 @@ type ResponseJokes struct {
 		Political bool `json:"political"`
 		Explicit  bool `json:"explicit"`
 	} `json:"flags"`
-	Id   int    `json:"id"`
-	Safe bool   `json:"safe"`
+	ID   int  `json:"id"`
+	Safe bool `json:"safe"`
 	Lang string `json:"lang"`
 }

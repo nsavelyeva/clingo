@@ -30,9 +30,9 @@ func NewServiceJokes(token string) *ServiceJokes {
 
 // Request is a method to send the HTTP call to the 3rd party jokes API
 func (cj *ConfigJokes) Request() (string, *structs.ResponseJokes) {
-	jokesUrl := fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist",
+	jokesURL := fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist",
 		constants.JokesBaseURL)
-	req, e1 := http.NewRequest("GET", jokesUrl, nil)
+	req, e1 := http.NewRequest("GET", jokesURL, nil)
 	if e1 != nil {
 		fmt.Printf("Failed to build jokes request: %s", e1)
 		return e1.Error(), nil
@@ -79,7 +79,7 @@ func Run(out io.Writer, conf *ConfigJokes) error {
 			message = ":rolling_on_the_floor_laughing: " + message
 		}
 
-		_, _ = fmt.Fprint(out, "", message + "\n")
+		_, _ = fmt.Fprint(out, "", message+"\n")
 	}
 	return nil
 }

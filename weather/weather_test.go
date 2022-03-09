@@ -14,7 +14,7 @@ import (
 )
 
 // Slicing records example: records[:][0:1] is a list containing a single element (header row)
-var records = [][]string {
+var records = [][]string{
 	{"code", "day", "night", "icon", "emoji"},
 	{"1000", "Sunny", "Clear", "113", ":sunny:"},
 	{"1003", "Partly cloudy", "Partly cloudy", "116", ":sun_behind_cloud:"},
@@ -22,10 +22,10 @@ var records = [][]string {
 
 func TestConfigWeather_GetEmoji(t *testing.T) {
 	tests := []struct {
-		name   string
+		name    string
 		records [][]string
-		code   int
-		want   string
+		code    int
+		want    string
 	}{
 		{"Emoji found", records, 1003, ":sun_behind_cloud:"},
 		{"Emoji not found", records, 1333, ""},
@@ -158,29 +158,29 @@ func TestRun(t *testing.T) {
 
 	mockData := &structs.ResponseWeather{
 		Location: &structs.Location{
-			Name:           "city",
+			Name: "city",
 		},
 		Current:  &structs.Current{
-			TempC:            1.0,
-			Condition:        structs.Condition{Text: "mock weather", Code: 1153},
-			WindKph:          5.0,
-			WindDir:          "N",
-			PressureMb:       11.2,
-			Humidity:         90,
-			FeelslikeC:       0.1,
-			Uv:               3.0,
+			TempC:      1.0,
+			Condition:  structs.Condition{Text: "mock weather", Code: 1153},
+			WindKph:    5.0,
+			WindDir:    "N",
+			PressureMb: 11.2,
+			Humidity:   90,
+			FeelslikeC: 0.1,
+			Uv:         3.0,
 		},
 	}
 	wantOutput := "city: :rain_cloud: mock weather, t 1.0C (feels like 0.1C), wind N 5.00 km/h (1.4 m/s), pressure 11.2 mb, humidity 90, UV 3.0\n"
 
 	tests := []struct {
-		name    string
-		city    string
-		token   string
-		mockStatus string
+		name        string
+		city        string
+		token       string
+		mockStatus  string
 		mockMessage string
-		mockData structs.ResponseWeather
-		wantOut string
+		mockData    structs.ResponseWeather
+		wantOut     string
 	}{
 		{"ok", "city", "token", "200", "", *mockData, wantOutput},
 	}

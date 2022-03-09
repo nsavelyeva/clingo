@@ -34,8 +34,8 @@ func NewServiceCurrency(from string, to string, token string) *ServiceCurrency {
 
 // Request is a method to send the HTTP call to the 3rd party currency API
 func (cw *ConfigCurrency) Request() (string, *structs.ResponseCurrency) {
-	currencyUrl := fmt.Sprintf("%s/latest?apikey=%s&base_currency=%s", constants.CurrencyBaseURL, cw.Token, cw.From)
-	resp, e1 := http.Get(currencyUrl)
+	currencyURL := fmt.Sprintf("%s/latest?apikey=%s&base_currency=%s", constants.CurrencyBaseURL, cw.Token, cw.From)
+	resp, e1 := http.Get(currencyURL)
 	if e1 != nil {
 		fmt.Printf("Currency request failed: %s\n", e1)
 		return e1.Error(), nil

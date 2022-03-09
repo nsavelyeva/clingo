@@ -54,7 +54,6 @@ func TestPrecedence(t *testing.T) {
 	_, e8 := f.WriteString(s)
 	require.NoError(t, e8, fmt.Sprintf("failed to write file %s due to %s", eventsFileName, e8))
 
-
 	// Set favorite-color with the config file
 	t.Run("config file", func(t *testing.T) {
 		// Copy the config file into our temporary test directory
