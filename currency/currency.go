@@ -3,6 +3,7 @@ package currency
 import (
 	"clingo/constants"
 	"clingo/helpers"
+	"clingo/structs"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,8 +15,8 @@ import (
 
 // ServiceCurrency is an interface for ConfigCurrency struct
 type ServiceCurrency interface {
-	Request() (string, *ResponseCurrency)
-	GetRate(rc *ResponseCurrency, field string) float64
+	Request() (string, *structs.ResponseCurrency)
+	GetRate(rc *structs.ResponseCurrency, field string) float64
 }
 
 // ConfigCurrency is a struct to keep input parameters required for the HTTP request to currency API
@@ -32,7 +33,7 @@ func NewServiceCurrency(from string, to string, token string) *ServiceCurrency {
 }
 
 // Request is a method to send the HTTP call to the 3rd party currency API
-func (cw *ConfigCurrency) Request() (string, *ResponseCurrency) {
+func (cw *ConfigCurrency) Request() (string, *structs.ResponseCurrency) {
 	currencyUrl := fmt.Sprintf("%s/latest?apikey=%s&base_currency=%s", constants.CurrencyBaseURL, cw.Token, cw.From)
 	resp, e1 := http.Get(currencyUrl)
 	if e1 != nil {
@@ -51,7 +52,7 @@ func (cw *ConfigCurrency) Request() (string, *ResponseCurrency) {
 	//log.Printf("Currency request from currency %s to currency %s responded with %s\n%s",
 	//	cw.From, cw.To, resp.Status, string(body))
 
-	var currency ResponseCurrency
+	var currency structs.ResponseCurrency
 	e3 := json.Unmarshal(body, &currency)
 	if e3 != nil {
 		fmt.Printf("Reading currency response body failed: %s\n", e3)
@@ -63,7 +64,7 @@ func (cw *ConfigCurrency) Request() (string, *ResponseCurrency) {
 
 // GetRate is a method that takes a value of the given field using its name as a string,
 // i.e. not as a property because property value is unknown (dynamic)
-func (cw *ConfigCurrency) GetRate(rc *ResponseCurrency, field string) float64 {
+func (cw *ConfigCurrency) GetRate(rc *structs.ResponseCurrency, field string) float64 {
 	r := reflect.ValueOf(rc.Data)
 	f := reflect.Indirect(r).FieldByName(field)
 	return f.Float()
@@ -72,7 +73,7 @@ func (cw *ConfigCurrency) GetRate(rc *ResponseCurrency, field string) float64 {
 // Run is a function to send an HTTP request to 3rd party Currency API and print the summary in case of success
 func Run(out io.Writer, conf *ConfigCurrency) error {
 	content := helpers.ReadJSON(constants.CurrencyDetailsJSONFilePath)
-	var details map[string]DetailsCurrency
+	var details map[string]structs.DetailsCurrency
 	err := json.Unmarshal(content, &details)
 	if err != nil {
 		fmt.Printf(`Error loading JSON from "%s": %s`, constants.CurrencyDetailsJSONFilePath, err)
@@ -91,13 +92,14 @@ func Run(out io.Writer, conf *ConfigCurrency) error {
 	sc := *NewServiceCurrency(conf.From, conf.To, conf.Token)
 	status, currency := sc.Request()
 
-	if status == "200 OK" {
+	if strings.HasPrefix(status, "200") {
 		m := ""
 		for _, c := range cc {
 			rate := sc.GetRate(currency, c)
 			m += fmt.Sprintf(" = %.6f %s", rate, details[c].Symbol)
 		}
-		fmt.Printf("1 %s%s\n", details[strings.ToUpper(conf.From)].Symbol, m)
+		m = fmt.Sprintf("1 %s%s\n", details[strings.ToUpper(conf.From)].Symbol, m)
+		_, _ = fmt.Fprint(out, "", m)
 	}
 	return nil
 }

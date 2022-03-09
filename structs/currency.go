@@ -1,4 +1,4 @@
-package currency
+package structs
 
 // DetailsCurrency is a struct to store currency details for a certain country
 type DetailsCurrency struct {

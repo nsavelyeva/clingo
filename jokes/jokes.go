@@ -2,16 +2,18 @@ package jokes
 
 import (
 	"clingo/constants"
+	"clingo/structs"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // ServiceJokes is an interface for ConfigJokes struct
 type ServiceJokes interface {
-	Request() (string, *ResponseJokes)
+	Request() (string, *structs.ResponseJokes)
 }
 
 // ConfigJokes is a struct to keep input parameters required for the HTTP request to weather API
@@ -27,7 +29,7 @@ func NewServiceJokes(token string) *ServiceJokes {
 }
 
 // Request is a method to send the HTTP call to the 3rd party jokes API
-func (cj *ConfigJokes) Request() (string, *ResponseJokes) {
+func (cj *ConfigJokes) Request() (string, *structs.ResponseJokes) {
 	jokesUrl := fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist",
 		constants.JokesBaseURL)
 	req, e1 := http.NewRequest("GET", jokesUrl, nil)
@@ -56,7 +58,7 @@ func (cj *ConfigJokes) Request() (string, *ResponseJokes) {
 	}
 	//log.Printf("Jokes request responded with %s\n%s", resp.Status, string(body))
 
-	var joke ResponseJokes
+	var joke structs.ResponseJokes
 	e4 := json.Unmarshal(body, &joke)
 	if e4 != nil {
 		fmt.Printf("Reading weather response body failed: %s\n", e4)
@@ -71,12 +73,13 @@ func Run(out io.Writer, conf *ConfigJokes) error {
 	sj := *NewServiceJokes(conf.Token)
 	status, jokes := sj.Request()
 
-	if status == "200 OK" {
+	if strings.HasPrefix(status, "200") {
 		message := jokes.Joke
 		if conf.Emoji == true {
 			message = ":rolling_on_the_floor_laughing: " + message
 		}
-		fmt.Printf(message + "\n")
+
+		_, _ = fmt.Fprint(out, "", message + "\n")
 	}
 	return nil
 }

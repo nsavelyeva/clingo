@@ -1,4 +1,4 @@
-package jokes
+package structs
 
 // ResponseJokes is a struct to store successful HTTP response from jokes API
 type ResponseJokes struct {
