@@ -2,6 +2,7 @@ package test
 
 import (
 	"clingo/structs"
+
 	"github.com/stretchr/testify/mock"
 )
 

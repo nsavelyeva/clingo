@@ -75,7 +75,7 @@ func Run(out io.Writer, conf *ConfigJokes) error {
 
 	if strings.HasPrefix(status, "200") {
 		message := jokes.Joke
-		if conf.Emoji == true {
+		if conf.Emoji {
 			message = ":rolling_on_the_floor_laughing: " + message
 		}
 

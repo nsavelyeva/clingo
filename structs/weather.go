@@ -27,27 +27,27 @@ type Condition struct {
 
 // Current is a sub-struct of ResponseWeather struct
 type Current struct {
-	LastUpdatedEpoch int     `json:"last_updated_epoch"`
-	LastUpdated      string  `json:"last_updated"`
-	TempC            float64 `json:"temp_c"`
-	TempF            float64 `json:"temp_f"`
-	IsDay            int     `json:"is_day"`
+	LastUpdatedEpoch int       `json:"last_updated_epoch"`
+	LastUpdated      string    `json:"last_updated"`
+	TempC            float64   `json:"temp_c"`
+	TempF            float64   `json:"temp_f"`
+	IsDay            int       `json:"is_day"`
 	Condition        Condition `json:"condition"`
-	WindMph   		 float64 `json:"wind_mph"`
-	WindKph   		 float64 `json:"wind_kph"`
-	WindDegree		 int     `json:"wind_degree"`
-	WindDir   		 string  `json:"wind_dir"`
-	PressureMb 		float64 `json:"pressure_mb"`
-	PressureIn		 float64 `json:"pressure_in"`
-	PrecipMm  		 float64 `json:"precip_mm"`
-	PrecipIn  		 float64 `json:"precip_in"`
-	Humidity 		  int     `json:"humidity"`
-	Cloud    		  int     `json:"cloud"`
-	FeelslikeC		 float64 `json:"feelslike_c"`
-	FeelslikeF		 float64 `json:"feelslike_f"`
-	VisKm     		 float64 `json:"vis_km"`
-	VisMiles  		 float64 `json:"vis_miles"`
-	Uv        		 float64 `json:"uv"`
-	GustMph   		 float64 `json:"gust_mph"`
-	GustKph   		 float64 `json:"gust_kph"`
+	WindMph   		 float64   `json:"wind_mph"`
+	WindKph   		 float64   `json:"wind_kph"`
+	WindDegree		 int       `json:"wind_degree"`
+	WindDir   		 string    `json:"wind_dir"`
+	PressureMb 		 float64   `json:"pressure_mb"`
+	PressureIn		 float64   `json:"pressure_in"`
+	PrecipMm  		 float64   `json:"precip_mm"`
+	PrecipIn  		 float64   `json:"precip_in"`
+	Humidity 		 int       `json:"humidity"`
+	Cloud    		 int       `json:"cloud"`
+	FeelslikeC		 float64   `json:"feelslike_c"`
+	FeelslikeF		 float64   `json:"feelslike_f"`
+	VisKm     		 float64   `json:"vis_km"`
+	VisMiles  		 float64   `json:"vis_miles"`
+	Uv        		 float64   `json:"uv"`
+	GustMph   		 float64   `json:"gust_mph"`
+	GustKph   		 float64   `json:"gust_kph"`
 }

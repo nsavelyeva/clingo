@@ -6,11 +6,12 @@ import (
 	"clingo/structs"
 	"clingo/test"
 	"fmt"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/require"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/require"
 )
 
 // Slicing records example: records[:][0:1] is a list containing a single element (header row)
