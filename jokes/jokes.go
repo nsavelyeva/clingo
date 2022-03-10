@@ -55,9 +55,9 @@ func (cj *ConfigJokes) Request() (int, string, *structs.ResponseJokes) {
 	//log.Printf("Jokes request responded with %s\n%s", resp.Status, string(body))
 
 	if resp.StatusCode != 200 {
-		return resp.StatusCode, string(body)+"\n", nil // TODO: return custom error message based on parsed body
+		return resp.StatusCode, string(body) + "\n", nil // TODO: return custom error message based on parsed body
 	}
-	
+
 	var joke structs.ResponseJokes
 	e4 := json.Unmarshal(body, &joke)
 	if e4 != nil {

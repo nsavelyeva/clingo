@@ -7,11 +7,12 @@ import (
 	"clingo/test"
 	"errors"
 	"fmt"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_GetRate(t *testing.T) {
@@ -30,7 +31,7 @@ func Test_GetRate(t *testing.T) {
 		currency string
 		want     float64
 	}{
-		{"Currency found (capitalized)",  "EUR", 1.5},
+		{"Currency found (capitalized)", "EUR", 1.5},
 		{"Currency not found (non-capitalized)", "eur", 0},
 		{"Currency not found (wrong currency value)", "foo", 0},
 	}
@@ -44,7 +45,7 @@ func Test_GetRate(t *testing.T) {
 }
 
 func Test_ValidateInputs(t *testing.T) {
-	var details = map[string]structs.DetailsCurrency {
+	var details = map[string]structs.DetailsCurrency{
 		"USD": {Symbol: "$", Name: "US Dollar"},
 		"RUB": {Symbol: "₽", Name: "Russian Ruble"},
 		"EUR": {Symbol: "€", Name: "Euro"},
@@ -244,7 +245,7 @@ func TestNewServiceCurrency(t *testing.T) {
 		{"ok", "eur", "usd,rub", "token"},
 		{"empty from is ok", "", "eur", "token"},
 		{"empty to is ok", "usd", "", "token"},
-		{"empty token is ok", "rub", "eur",""},
+		{"empty token is ok", "rub", "eur", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -260,7 +261,7 @@ func TestNewServiceCurrency(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	var details = map[string]structs.DetailsCurrency {
+	var details = map[string]structs.DetailsCurrency{
 		"USD": {Symbol: "$", Name: "US Dollar"},
 		"RUB": {Symbol: "₽", Name: "Russian Ruble"},
 		"EUR": {Symbol: "€", Name: "Euro"},

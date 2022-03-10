@@ -52,7 +52,7 @@ func (cw *ConfigWeather) Request() (int, string, *structs.ResponseWeather) {
 	//	cw.City, resp.Status, string(body))
 
 	if resp.StatusCode != 200 {
-		return resp.StatusCode, string(body)+"\n", nil // TODO: return custom error message based on parsed body
+		return resp.StatusCode, string(body) + "\n", nil // TODO: return custom error message based on parsed body
 	}
 
 	var weather structs.ResponseWeather

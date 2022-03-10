@@ -7,11 +7,12 @@ import (
 	"clingo/test"
 	"errors"
 	"fmt"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfigJokes_Request(t *testing.T) {

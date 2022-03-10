@@ -55,7 +55,7 @@ func (cw *ConfigCurrency) Request() (int, string, *structs.ResponseCurrency) {
 	//	cw.From, cw.To, resp.Status, string(body))
 
 	if resp.StatusCode != 200 {
-		return resp.StatusCode, string(body)+"\n", nil // TODO: return custom error message based on parsed body
+		return resp.StatusCode, string(body) + "\n", nil // TODO: return custom error message based on parsed body
 	}
 
 	var currency structs.ResponseCurrency
