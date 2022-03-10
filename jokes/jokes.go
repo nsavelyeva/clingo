@@ -2,6 +2,7 @@ package jokes
 
 import (
 	"clingo/constants"
+	"clingo/structs"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,7 +12,7 @@ import (
 
 // ServiceJokes is an interface for ConfigJokes struct
 type ServiceJokes interface {
-	Request() (string, *ResponseJokes)
+	Request() (int, string, *structs.ResponseJokes)
 }
 
 // ConfigJokes is a struct to keep input parameters required for the HTTP request to weather API
@@ -27,13 +28,12 @@ func NewServiceJokes(token string) *ServiceJokes {
 }
 
 // Request is a method to send the HTTP call to the 3rd party jokes API
-func (cj *ConfigJokes) Request() (string, *ResponseJokes) {
-	jokesUrl := fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist",
+func (cj *ConfigJokes) Request() (int, string, *structs.ResponseJokes) {
+	jokesURL := fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist",
 		constants.JokesBaseURL)
-	req, e1 := http.NewRequest("GET", jokesUrl, nil)
+	req, e1 := http.NewRequest("GET", jokesURL, nil)
 	if e1 != nil {
-		fmt.Printf("Failed to build jokes request: %s", e1)
-		return e1.Error(), nil
+		return 0, fmt.Sprintf("Failed to build jokes request: %s\n", e1), nil
 	}
 
 	req.Header.Add("x-rapidapi-host", "jokeapi-v2.p.rapidapi.com")
@@ -41,8 +41,7 @@ func (cj *ConfigJokes) Request() (string, *ResponseJokes) {
 
 	resp, e2 := http.DefaultClient.Do(req)
 	if e2 != nil {
-		fmt.Printf("Jokes request failed: %s\n", e2)
-		return e2.Error(), nil
+		return 0, fmt.Sprintf("Jokes request failed: %s\n", e2), nil
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -51,32 +50,36 @@ func (cj *ConfigJokes) Request() (string, *ResponseJokes) {
 
 	body, e3 := ioutil.ReadAll(resp.Body)
 	if e3 != nil {
-		fmt.Printf("Failed to read jokes response body: %s\n", e3)
-		return e3.Error(), nil
+		return resp.StatusCode, fmt.Sprintf("Failed to read jokes response body: %s\n", e3), nil
 	}
 	//log.Printf("Jokes request responded with %s\n%s", resp.Status, string(body))
 
-	var joke ResponseJokes
-	e4 := json.Unmarshal(body, &joke)
-	if e4 != nil {
-		fmt.Printf("Reading weather response body failed: %s\n", e4)
-		return e4.Error(), nil
+	if resp.StatusCode != 200 {
+		return resp.StatusCode, string(body) + "\n", nil // TODO: return custom error message based on parsed body
 	}
 
-	return resp.Status, &joke
+	var joke structs.ResponseJokes
+	e4 := json.Unmarshal(body, &joke)
+	if e4 != nil {
+		return resp.StatusCode, fmt.Sprintf("Reading JSON from jokes response body failed: %s\n", e4), nil
+	}
+
+	return resp.StatusCode, "", &joke
 }
 
 // Run is a function to send an HTTP request to 3rd party Jokes API and print the summary in case of success
-func Run(out io.Writer, conf *ConfigJokes) error {
-	sj := *NewServiceJokes(conf.Token)
-	status, jokes := sj.Request()
+func Run(out io.Writer, sj ServiceJokes, conf *ConfigJokes) error {
+	output := ""
+	status, message, jokes := sj.Request()
 
-	if status == "200 OK" {
-		message := jokes.Joke
-		if conf.Emoji == true {
-			message = ":rolling_on_the_floor_laughing: " + message
+	if status == 200 {
+		output = jokes.Joke
+		if conf.Emoji {
+			output = fmt.Sprintf(":rolling_on_the_floor_laughing: %s", output)
 		}
-		fmt.Printf(message + "\n")
+	} else {
+		output = fmt.Sprintf("Error: %s", message)
 	}
+	_, _ = fmt.Fprint(out, "", output)
 	return nil
 }
