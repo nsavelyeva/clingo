@@ -21,3 +21,9 @@ func (m *ServiceWeatherMock) Request() (string, string, *structs.ResponseWeather
 	args := m.Called()
 	return args.Get(0).(string), args.Get(1).(string), args.Get(2).(*structs.ResponseWeather)
 }
+
+// GetEmoji is a mock method for ServiceWeatherMock struct
+func (m *ServiceWeatherMock) GetEmoji(code int) string {
+	args := m.Called(code)
+	return args.Get(0).(string)
+}

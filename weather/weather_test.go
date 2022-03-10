@@ -5,8 +5,8 @@ import (
 	"clingo/constants"
 	"clingo/structs"
 	"clingo/test"
+	"errors"
 	"fmt"
-	"os"
 	"reflect"
 	"testing"
 
@@ -21,7 +21,7 @@ var records = [][]string{
 	{"1003", "Partly cloudy", "Partly cloudy", "116", ":sun_behind_cloud:"},
 }
 
-func TestConfigWeather_GetEmoji(t *testing.T) {
+func Test_FindEmoji(t *testing.T) {
 	tests := []struct {
 		name    string
 		records [][]string
@@ -35,8 +35,8 @@ func TestConfigWeather_GetEmoji(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetEmoji(tt.records, tt.code); got != tt.want {
-				t.Errorf("GetEmoji() = %v, want %v", got, tt.want)
+			if got := FindEmoji(tt.records, tt.code); got != tt.want {
+				t.Errorf("FindEmoji() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -62,6 +62,16 @@ func TestConfigWeather_Request(t *testing.T) {
 			"200",
 			"",
 			&structs.ResponseWeather{Location: &structs.Location{Name: "Amsterdam"}},
+		},
+		{
+			"go error (bad json)",
+			"Amsterdam",
+			"some_token",
+			200,
+			`{"Location":{"name":Amsterdam"}`,
+			"200",
+			"Reading JSON from weather response body failed: invalid character 'A' looking for beginning of value",
+			nil,
 		},
 		{
 			"bad request (wrong city value)",
@@ -111,7 +121,7 @@ func TestConfigWeather_Request(t *testing.T) {
 			httpmock.RegisterResponder(
 				"GET",
 				fmt.Sprintf("%s/current.json?key=%s&q=%s&aqi=no", constants.WeatherBaseURL, "token", "city"),
-				httpmock.NewStringResponder(tt.mockStatus, tt.mockBody),
+				httpmock.NewBytesResponder(tt.mockStatus, []byte(tt.mockBody)),
 			)
 
 			cw := ConfigWeather{City: "city", Token: "token"}
@@ -125,6 +135,48 @@ func TestConfigWeather_Request(t *testing.T) {
 			}
 			if !reflect.DeepEqual(message, tt.wantMessage) {
 				t.Errorf("Request() message got = %v, want %v", message, tt.mockBody)
+			}
+		})
+	}
+}
+
+func TestConfigWeather_RequestErrorHTTP(t *testing.T) {
+	tests := []struct {
+		name        string
+		mockError   string
+		wantStatus  string
+		wantMessage string
+		wantData    *structs.ResponseWeather
+	}{
+		{
+			"http error",
+			"some error",
+			"",
+			`Weather request failed: Get "http://api.weatherapi.com/v1/...": some error`,
+			nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+			httpmock.RegisterResponder(
+				"GET",
+				fmt.Sprintf("%s/current.json?key=%s&q=%s&aqi=no", constants.WeatherBaseURL, "token", "city"),
+				httpmock.NewErrorResponder(errors.New(tt.mockError)),
+			)
+
+			cw := ConfigWeather{City: "city", Token: "token"}
+			status, message, data := cw.Request()
+
+			if status != tt.wantStatus {
+				t.Errorf("Request() status got = %v, want %v", status, tt.wantStatus)
+			}
+			if message != tt.wantMessage {
+				t.Errorf("Request() message got = %v, want %v", message, tt.wantMessage)
+			}
+			if !reflect.DeepEqual(data, tt.wantData) {
+				t.Errorf("Request() data got = %v, want %v", data, tt.wantData)
 			}
 		})
 	}
@@ -154,9 +206,6 @@ func TestNewServiceWeather(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	curDir, e1 := os.Getwd()
-	require.NoError(t, e1, "Cannot get working directory")
-
 	mockData := &structs.ResponseWeather{
 		Location: &structs.Location{
 			Name: "city",
@@ -172,28 +221,26 @@ func TestRun(t *testing.T) {
 			Uv:         3.0,
 		},
 	}
-	wantOutput := "city: :rain_cloud: mock weather, t 1.0C (feels like 0.1C), wind N 5.00 km/h (1.4 m/s), pressure 11.2 mb, humidity 90, UV 3.0\n"
+	mockEmoji := ":clingo_weather:"
+	wantOutput := "city: :clingo_weather: mock weather, t 1.0C (feels like 0.1C), wind N 5.00 km/h (1.4 m/s), pressure 11.2 mb, humidity 90, UV 3.0\n"
 
 	tests := []struct {
 		name        string
 		city        string
 		token       string
+		mockEmoji   string
 		mockStatus  string
 		mockMessage string
 		mockData    structs.ResponseWeather
 		wantOut     string
 	}{
-		{"ok", "city", "token", "200", "", *mockData, wantOutput},
+		{"ok", "city", "token", mockEmoji, "200", "", *mockData, wantOutput},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			require.NoError(t,
-				os.Chdir(".."),
-				fmt.Sprintf("error going up from the current working directory '%s'", curDir),
-			)
-
 			ws := test.NewServiceWeatherMock(tt.city, tt.token)
 			ws.On("Request").Return(tt.mockStatus, tt.mockMessage, &tt.mockData)
+			ws.On("GetEmoji", mockData.Current.Condition.Code).Return(tt.mockEmoji)
 
 			out := &bytes.Buffer{}
 			err := Run(out, ws)
@@ -202,11 +249,6 @@ func TestRun(t *testing.T) {
 			if gotOut := out.String(); gotOut != tt.wantOut {
 				t.Errorf("Run() gotOut = %v, want %v", gotOut, tt.wantOut)
 			}
-
-			defer require.NoError(t,
-				os.Chdir(curDir),
-				fmt.Sprintf("error going back to the previous working directory '%s'", curDir),
-			)
 		})
 	}
 }
