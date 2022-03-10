@@ -16,7 +16,8 @@ func newCurrency() *cobra.Command {
 		Long:  "Request currency rate information for the given currency using specified base currency",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return currency.Run(cmd.OutOrStdout(), &conf)
+			sc := *currency.NewServiceCurrency(conf.From, conf.To, conf.Token)
+			return currency.Run(cmd.OutOrStdout(), sc, &conf)
 		},
 	}
 

@@ -182,6 +182,8 @@ func TestConfigWeather_RequestErrorHTTP(t *testing.T) {
 	}
 }
 
+// Test constructor is successful for different combinations of parameters values,
+// i.e. the created instance has Request() method (at least).
 func TestNewServiceWeather(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -235,6 +237,7 @@ func TestRun(t *testing.T) {
 		wantOut     string
 	}{
 		{"ok", "city", "token", mockEmoji, "200", "", *mockData, wantOutput},
+		{"empty output", "city", "token", mockEmoji, "400", "", *mockData, ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
