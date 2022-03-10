@@ -17,9 +17,9 @@ func NewServiceCurrencyMock(from string, to string, token string) *ServiceCurren
 }
 
 // Request is a mock method for ServiceCurrencyMock struct
-func (m *ServiceCurrencyMock) Request() (string, string, *structs.ResponseCurrency) {
+func (m *ServiceCurrencyMock) Request() (int, string, *structs.ResponseCurrency) {
 	args := m.Called()
-	return args.Get(0).(string), args.Get(1).(string), args.Get(2).(*structs.ResponseCurrency)
+	return args.Get(0).(int), args.Get(1).(string), args.Get(2).(*structs.ResponseCurrency)
 }
 
 // GetCurrenciesInfo is a mock method for ServiceCurrencyMock struct

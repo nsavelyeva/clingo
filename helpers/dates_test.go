@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Verify the returned value of GetDayMonth()
+// Verify the returned value of GetMonthDay()
 // if zero, positive and negative offset is given to the provided date,
 // confirm that leading zeros are displayed when needed.
 func TestGetDayMonth(t *testing.T) {
@@ -51,8 +51,8 @@ func TestGetDayMonth(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetDayMonth(tt.args.tm, tt.args.in); got != tt.want {
-				t.Errorf("GetDayMonth() = %v, want %v", got, tt.want)
+			if got := GetMonthDay(tt.args.tm, tt.args.in); got != tt.want {
+				t.Errorf("GetMonthDay() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -61,7 +61,7 @@ func NewRootCommand() *cobra.Command {
 			today := time.Now()
 			// today = time.Date(2022, time.March, 26, 23, 12, 5, 3, time.UTC)
 
-			dt := helpers.GetDayMonth(today, 0)
+			dt := helpers.GetMonthDay(today, 0)
 			if _, ok := details[dt]; ok && (filter == "" || details[dt].Type == filter) {
 				output += fmt.Sprintf("Today is %d %s %d: %s [%d year(s)]\n",
 					today.Day(), today.Month(), today.Year(),
@@ -70,7 +70,7 @@ func NewRootCommand() *cobra.Command {
 
 			// Now scan for the upcoming events with reminders
 			for i := 1; i < 10; i++ {
-				dt = helpers.GetDayMonth(today, i)
+				dt = helpers.GetMonthDay(today, i)
 				if _, ok := details[dt]; ok {
 					if i <= details[dt].Remind && (filter == "" || details[dt].Type == filter) {
 						output += fmt.Sprintf("In %d day(s) will be %d-%s: %s [%d year(s)]\n",

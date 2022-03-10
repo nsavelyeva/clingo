@@ -10,6 +10,7 @@ import (
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -21,17 +22,20 @@ func Test_GetRate(t *testing.T) {
 			EUR: 1.50,
 		},
 	}
+
+	cc := ConfigCurrency{From: "from", To: "to", Token: "token"}
+
 	tests := []struct {
 		name     string
 		currency string
 		want     float64
 	}{
-		{"Currency found",  "EUR", 1.5},
-		{"Currency not found", "eur", 0},
+		{"Currency found (capitalized)",  "EUR", 1.5},
+		{"Currency not found (non-capitalized)", "eur", 0},
+		{"Currency not found (wrong currency value)", "foo", 0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cc := ConfigCurrency{From: "from", To: "to", Token: "token"}
 			if got := cc.GetRate(responseData, tt.currency); got != tt.want {
 				t.Errorf("GetRate() = %v, want %v", got, tt.want)
 			}
@@ -46,28 +50,29 @@ func Test_ValidateInputs(t *testing.T) {
 		"EUR": {Symbol: "€", Name: "Euro"},
 	}
 
+	cc := ConfigCurrency{From: "from", To: "to", Token: "token"}
+
 	tests := []struct {
 		name string
 		from string
 		to   string
 		want string
 	}{
-		{"Validate uppercase base currency", "USD", "EUR", ""},
-		{"Validate lowercase base currency", "usd", "EUR", ""},
+		{"Validate uppercase from-currency", "USD", "EUR", ""},
+		{"Validate lowercase from-currency", "usd", "EUR", ""},
 		{"Validate uppercase to-currency", "USD", "EUR", ""},
 		{"Validate lowercase to-currency", "USD", "eur", ""},
 		{"Validate mixed to-currency multiple", "USD", "EUR,RUB,USD", ""},
-		{"Validate wrong base currency", "PLN", "EUR", "Value \"PLN\" is not recognized as supported currency\n"},
+		{"Validate wrong from-currency", "PLN", "EUR", "Value \"PLN\" is not recognized as supported currency\n"},
 		{"Validate wrong to-currency", "USD", "BYN", "Value \"BYN\" is not recognized as supported currency\n"},
-		{"Validate wrong to-currency in list of to-currencies", "usd", "EUR,PLN,BYN,USD", "Value \"PLN\" is not recognized as supported currency\nValue \"BYN\" is not recognized as supported currency\n"},
-		{"Validate empty base currency", "", "EUR", "Value \"\" is not recognized as supported currency\n"},
+		{"Validate wrong to-currencies in list of to-currencies", "usd", "EUR,PLN,BYN,USD", "Value \"PLN\" is not recognized as supported currency\nValue \"BYN\" is not recognized as supported currency\n"},
+		{"Validate empty from-currency", "", "EUR", "Value \"\" is not recognized as supported currency\n"},
 		{"Validate empty to-currency", "USD", "", "Value \"\" is not recognized as supported currency\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cc := ConfigCurrency{From: "from", To: "to", Token: "token"}
 			if got := cc.ValidateInputs(details, tt.to, tt.from); got != tt.want {
-				t.Errorf("FindEmoji() = %v, want %v", got, tt.want)
+				t.Errorf("ValidateInputs() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -81,7 +86,6 @@ func TestConfigCurrency_Request(t *testing.T) {
 		token       string
 		mockStatus  int
 		mockBody    string
-		wantStatus  string
 		wantMessage string
 		wantData    *structs.ResponseCurrency
 	}{
@@ -92,7 +96,6 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"some_token",
 			200,
 			`{"data":{"USD":0.359306}}`,
-			"200",
 			"",
 			&structs.ResponseCurrency{Data: &structs.Data{USD: 0.359306}},
 		},
@@ -103,7 +106,6 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"some_token",
 			200,
 			`{"data":{"USD":0.359306,"RUB":0.112025,"EUR":1.0}}`,
-			"200",
 			"",
 			&structs.ResponseCurrency{Data: &structs.Data{USD: 0.359306, RUB: 0.112025, EUR: 1.0}},
 		},
@@ -114,8 +116,7 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"some_token",
 			200,
 			`{"data":{"USD":0.359306,"RUB":0.112025,"EUR":1.0}`,
-			"200",
-			"Reading currency response body failed: unexpected end of JSON input\n",
+			"Reading currency response body failed: unexpected end of JSON input",
 			nil,
 		},
 		{
@@ -125,7 +126,6 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"some_token",
 			422,
 			`{"message":"The selected base currency is invalid.","errors":{"base_currency":["The selected base currency is invalid."]}}`,
-			"422",
 			`{"message":"The selected base currency is invalid.","errors":{"base_currency":["The selected base currency is invalid."]}}`,
 			nil,
 		},
@@ -136,7 +136,6 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"some_token",
 			200,
 			`{"data":{"USD":1.0,"RUB":0.112025,"EUR":0.359306}}`,
-			"200",
 			"",
 			&structs.ResponseCurrency{Data: &structs.Data{EUR: 0.359306, RUB: 0.112025, USD: 1.0}},
 		},
@@ -147,8 +146,7 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"foo",
 			429,
 			`{"message":"API rate limit exceeded"}`,
-			"429",
-			`{"message":"API rate limit exceeded"}`,
+			`{"message":"API rate limit exceeded"}`, // TODO: improve
 			nil,
 		},
 		{
@@ -158,7 +156,6 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"",
 			429,
 			`{"message":"API rate limit exceeded"}`,
-			"429",
 			`{"message":"API rate limit exceeded"}`,
 			nil,
 		},
@@ -176,32 +173,34 @@ func TestConfigCurrency_Request(t *testing.T) {
 			cc := ConfigCurrency{From: tt.from, To: tt.to, Token: tt.token}
 			status, message, data := cc.Request()
 
-			if status != tt.wantStatus {
-				t.Errorf("Request() status got = %v, want %v", status, tt.wantStatus)
+			if status != tt.mockStatus {
+				t.Errorf("Request() status got = %v, want %v", status, tt.mockStatus)
+			}
+			if strings.TrimRight(message, "\n") != tt.wantMessage {
+				t.Errorf("Request() message got = %v, want %v", message, tt.wantMessage)
 			}
 			if !reflect.DeepEqual(data, tt.wantData) {
 				t.Errorf("Request() data got = %v, want %v", data, tt.wantData)
-			}
-			if !reflect.DeepEqual(message, tt.wantMessage) {
-				t.Errorf("Request() message got = %v, want %v", message, tt.mockBody)
 			}
 		})
 	}
 }
 
 func TestConfigCurrency_RequestErrorHTTP(t *testing.T) {
+	cc := ConfigCurrency{From: "from", To: "to", Token: "token"}
+
 	tests := []struct {
 		name        string
 		mockError   string
-		wantStatus  string
+		wantStatus  int
 		wantMessage string
 		wantData    *structs.ResponseCurrency
 	}{
 		{
 			"http error",
 			"some error",
-			"",
-			`Currency request failed: Get "https://freecurrencyapi.net/api/v2/...": some error`,
+			0,
+			fmt.Sprintf("Currency request failed: Get \"%s/...\": some error\n", constants.CurrencyBaseURL),
 			nil,
 		},
 	}
@@ -215,7 +214,6 @@ func TestConfigCurrency_RequestErrorHTTP(t *testing.T) {
 				httpmock.NewErrorResponder(errors.New(tt.mockError)),
 			)
 
-			cc := ConfigCurrency{From: "from", To: "to", Token: "token"}
 			status, message, data := cc.Request()
 
 			if status != tt.wantStatus {
@@ -233,6 +231,9 @@ func TestConfigCurrency_RequestErrorHTTP(t *testing.T) {
 
 // Test constructor is successful for different combinations of parameters values,
 // i.e. the created instance has Request() method (at least).
+// Note, no need to loop over all methods because it is handled by compilation.
+// TODO: empty parameters (from, to, token) should be rejected (hence, 2nd, 3rd and 4th tests will need to be updated then),
+// but this needs code change in the constructor.
 func TestNewServiceCurrency(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -279,13 +280,44 @@ func TestRun(t *testing.T) {
 		to           string
 		token        string
 		mockValidate string
-		mockStatus   string
+		mockStatus   int
 		mockMessage  string
 		mockData     structs.ResponseCurrency
 		wantOut      string
 	}{
-		{"ok", "rub", "eur", "token", "", "200", "", *mockData, "1 ₽ = 1.500000 €\n"},
-		{"validation error", "eur", "usd", "token", "validation error", "400", "", *mockData, "validation error\n"},
+		{
+			"ok (200 response)",
+			"rub",
+			"eur",
+			"token",
+			"",
+			200,
+			"",
+			*mockData,
+			"1 ₽ = 1.500000 €\n",
+		},
+		{
+			"error output (non-200 response)",
+			"eur",
+			"usd",
+			"token",
+			"validation error",
+			400,
+			"",
+			*mockData,
+			"validation error\n",
+		},
+		{
+			"error output (0 response)",
+			"eur",
+			"usd",
+			"token",
+			"validation error",
+			400,
+			"",
+			*mockData,
+			"validation error\n",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -298,7 +330,7 @@ func TestRun(t *testing.T) {
 			conf := ConfigCurrency{From: tt.from, To: tt.to, Token: tt.token}
 			out := &bytes.Buffer{}
 			err := Run(out, cs, &conf)
-			require.NoError(t, err, fmt.Sprintf("weather.Run() failed with error '%s'", err))
+			require.NoError(t, err, fmt.Sprintf("currency.Run() failed with error '%s'", err))
 
 			if gotOut := out.String(); gotOut != tt.wantOut {
 				t.Errorf("Run() gotOut = %v, want %v", gotOut, tt.wantOut)
@@ -306,4 +338,3 @@ func TestRun(t *testing.T) {
 		})
 	}
 }
-

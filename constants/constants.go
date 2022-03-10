@@ -7,7 +7,7 @@ const WeatherBaseURL = "http://api.weatherapi.com/v1"
 const CurrencyBaseURL = "https://freecurrencyapi.net/api/v2"
 
 // JokesBaseURL is a string constant to keep the base URL of jokes API
-const JokesBaseURL = "https://jokeapi-v2.p.rapidapi.com/"
+const JokesBaseURL = "https://jokeapi-v2.p.rapidapi.com"
 
 // WeatherConditionsCSVFilePath is a string constant to keep the relative path to the weather resource file
 const WeatherConditionsCSVFilePath = "weather/conditions.csv"

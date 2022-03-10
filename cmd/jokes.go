@@ -16,7 +16,8 @@ func newJokes() *cobra.Command {
 		Long:  "Request a random short joke",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return jokes.Run(cmd.OutOrStdout(), &conf)
+			sj := *jokes.NewServiceJokes(conf.Token)
+			return jokes.Run(cmd.OutOrStdout(), sj, &conf)
 		},
 	}
 

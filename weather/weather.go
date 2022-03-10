@@ -15,7 +15,7 @@ import (
 
 // ServiceWeather is an interface for ConfigWeather struct
 type ServiceWeather interface {
-	Request() (string, string, *structs.ResponseWeather)
+	Request() (int, string, *structs.ResponseWeather)
 	GetEmoji(int) string
 }
 
@@ -31,13 +31,14 @@ func NewServiceWeather(city string, token string) *ServiceWeather {
 	return &conf
 }
 
-// Request is a method to send the HTTP call to the 3rd party weather API
-func (cw *ConfigWeather) Request() (string, string, *structs.ResponseWeather) {
+// Request is a method to send the HTTP call to the 3rd party weather API.
+// Returns HTTP response status code (if available), error message or empty string, weather data structure or nil.
+func (cw *ConfigWeather) Request() (int, string, *structs.ResponseWeather) {
 	weatherURL := fmt.Sprintf("%s/current.json?key=%s&q=%s&aqi=no", constants.WeatherBaseURL, cw.Token, cw.City)
 	resp, e1 := http.Get(weatherURL)
 	if e1 != nil {
-		message := strings.Replace(fmt.Sprintf("Weather request failed: %s", e1), weatherURL, constants.WeatherBaseURL+"/...", 1)
-		return "", message, nil
+		message := fmt.Sprintf("Weather request failed: %s\n", e1)
+		return 0, strings.Replace(message, weatherURL, constants.WeatherBaseURL+"/...", 1), nil
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
@@ -45,22 +46,22 @@ func (cw *ConfigWeather) Request() (string, string, *structs.ResponseWeather) {
 
 	body, e2 := ioutil.ReadAll(resp.Body)
 	if e2 != nil {
-		return resp.Status, fmt.Sprintf("Failed to read weather response body: %s", e2), nil
+		return resp.StatusCode, fmt.Sprintf("Failed to read weather response body: %s\n", e2), nil
 	}
 	//log.Printf("Weather request for the city %s responded with %s\n%s",
 	//	cw.City, resp.Status, string(body))
 
-	if resp.Status != "200" {
-		return resp.Status, string(body), nil
+	if resp.StatusCode != 200 {
+		return resp.StatusCode, string(body)+"\n", nil // TODO: return custom error message based on parsed body
 	}
 
 	var weather structs.ResponseWeather
 	e3 := json.Unmarshal(body, &weather)
 	if e3 != nil {
-		return resp.Status, fmt.Sprintf("Reading JSON from weather response body failed: %s", e3), nil
+		return resp.StatusCode, fmt.Sprintf("Reading JSON from weather response body failed: %s\n", e3), nil
 	}
 
-	return resp.Status, "", &weather
+	return resp.StatusCode, "", &weather
 }
 
 // GetEmoji is a method to read CSV data of weather conditions and find emoji there by its code
@@ -84,19 +85,21 @@ func FindEmoji(records [][]string, code int) string {
 
 // Run is a function to send an HTTP request to 3rd party Weather API and print the summary in case of success
 func Run(out io.Writer, sw ServiceWeather) error {
-	status, _, weather := sw.Request()
+	output := ""
+	status, message, weather := sw.Request()
 
-	if strings.HasPrefix(status, "200") {
+	if status == 200 {
 		emoji := sw.GetEmoji(weather.Current.Condition.Code)
 		ms := weather.Current.WindKph * 1000 / 3600
 
-		output := fmt.Sprintf("%s: %s %s, t %.1fC (feels like %.1fC), wind %s %.2f km/h (%.1f m/s), pressure %.1f mb, humidity %d, UV %.1f\n",
+		output = fmt.Sprintf("%s: %s %s, t %.1fC (feels like %.1fC), wind %s %.2f km/h (%.1f m/s), pressure %.1f mb, humidity %d, UV %.1f\n",
 			weather.Location.Name, emoji, weather.Current.Condition.Text,
 			weather.Current.TempC, weather.Current.FeelslikeC,
 			weather.Current.WindDir, weather.Current.WindKph, ms,
 			weather.Current.PressureMb, weather.Current.Humidity, weather.Current.Uv)
-
-		_, _ = fmt.Fprint(out, "", output)
+	} else {
+		output = fmt.Sprintf("Error: %s", message)
 	}
+	_, _ = fmt.Fprint(out, "", output)
 	return nil
 }
