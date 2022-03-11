@@ -101,6 +101,7 @@ func NewRootCommand() *cobra.Command {
 		newWeather(),
 		newCurrency(),
 		newJokes(),
+		newNews(),
 	)
 
 	return rootCmd

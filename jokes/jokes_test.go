@@ -62,7 +62,7 @@ func TestConfigJokes_Request(t *testing.T) {
 			defer httpmock.DeactivateAndReset()
 			httpmock.RegisterResponder(
 				"GET",
-				fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
+				fmt.Sprintf("%s/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
 				httpmock.NewBytesResponder(tt.mockStatus, []byte(tt.mockBody)),
 			)
 
@@ -96,7 +96,7 @@ func TestConfigJokes_RequestErrorHTTP(t *testing.T) {
 			"http error",
 			"some error",
 			0,
-			fmt.Sprintf("Jokes request failed: Get \"%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist\": some error\n", constants.JokesBaseURL),
+			fmt.Sprintf("Jokes request failed: Get \"%s/Any?format=json&type=single&blacklistFlags=nsfw,racist\": some error\n", constants.JokesBaseURL),
 			nil,
 		},
 	}
@@ -106,7 +106,7 @@ func TestConfigJokes_RequestErrorHTTP(t *testing.T) {
 			defer httpmock.DeactivateAndReset()
 			httpmock.RegisterResponder(
 				"GET",
-				fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
+				fmt.Sprintf("%s/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
 				httpmock.NewErrorResponder(errors.New(tt.mockError)),
 			)
 
