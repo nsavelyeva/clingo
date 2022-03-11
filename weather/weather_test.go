@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -68,7 +67,7 @@ func TestConfigWeather_Request(t *testing.T) {
 			"some_token",
 			200,
 			`{"Location":{"name":Amsterdam"}}`,
-			"Reading JSON from weather response body failed: invalid character 'A' looking for beginning of value",
+			"Reading JSON from weather response body failed: invalid character 'A' looking for beginning of value\n",
 			nil,
 		},
 		{
@@ -77,7 +76,7 @@ func TestConfigWeather_Request(t *testing.T) {
 			"some_token",
 			400,
 			`{"error":{"code":1006,"message":"No matching location found."}}`,
-			`{"error":{"code":1006,"message":"No matching location found."}}`, // TODO: improve
+			`{"error":{"code":1006,"message":"No matching location found."}}` + "\n", // TODO: improve
 			nil,
 		},
 		{
@@ -86,7 +85,7 @@ func TestConfigWeather_Request(t *testing.T) {
 			"some_token",
 			400,
 			`{"error":{"code":1003,"message":"Parameter q is missing."}}`,
-			`{"error":{"code":1003,"message":"Parameter q is missing."}}`,
+			`{"error":{"code":1003,"message":"Parameter q is missing."}}` + "\n",
 			nil,
 		},
 		{
@@ -95,7 +94,7 @@ func TestConfigWeather_Request(t *testing.T) {
 			"some_token",
 			401,
 			`{"error":{"code":2006,"message":"API key is invalid."}}`,
-			`{"error":{"code":2006,"message":"API key is invalid."}}`,
+			`{"error":{"code":2006,"message":"API key is invalid."}}` + "\n",
 			nil,
 		},
 		{
@@ -104,7 +103,7 @@ func TestConfigWeather_Request(t *testing.T) {
 			"",
 			401,
 			`{"error":{"code":1002,"message":"API key is invalid or not provided."}}`,
-			`{"error":{"code":1002,"message":"API key is invalid or not provided."}}`,
+			`{"error":{"code":1002,"message":"API key is invalid or not provided."}}` + "\n",
 			nil,
 		},
 	}
@@ -124,7 +123,7 @@ func TestConfigWeather_Request(t *testing.T) {
 			if status != tt.mockStatus {
 				t.Errorf("Request() status got = %v, want %v", status, tt.mockStatus)
 			}
-			if strings.TrimRight(message, "\n") != tt.wantMessage {
+			if message != tt.wantMessage {
 				t.Errorf("Request() message got = %v, want %v", message, tt.wantMessage)
 			}
 			if !reflect.DeepEqual(data, tt.wantData) {
@@ -250,7 +249,7 @@ func TestRun(t *testing.T) {
 			400,
 			"error 400",
 			*mockData,
-			"Error: error 400",
+			"Error: error 400\n",
 		},
 		{
 			"error output (0 response)",
@@ -260,7 +259,7 @@ func TestRun(t *testing.T) {
 			0,
 			"error 0",
 			*mockData,
-			"Error: error 0",
+			"Error: error 0\n",
 		},
 	}
 	for _, tt := range tests {

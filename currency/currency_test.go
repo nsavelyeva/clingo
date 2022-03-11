@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -117,7 +116,7 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"some_token",
 			200,
 			`{"data":{"USD":0.359306,"RUB":0.112025,"EUR":1.0}`,
-			"Reading currency response body failed: unexpected end of JSON input",
+			"Reading currency response body failed: unexpected end of JSON input\n",
 			nil,
 		},
 		{
@@ -127,7 +126,7 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"some_token",
 			422,
 			`{"message":"The selected base currency is invalid.","errors":{"base_currency":["The selected base currency is invalid."]}}`,
-			`{"message":"The selected base currency is invalid.","errors":{"base_currency":["The selected base currency is invalid."]}}`,
+			`{"message":"The selected base currency is invalid.","errors":{"base_currency":["The selected base currency is invalid."]}}` + "\n",
 			nil,
 		},
 		{
@@ -147,7 +146,7 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"foo",
 			429,
 			`{"message":"API rate limit exceeded"}`,
-			`{"message":"API rate limit exceeded"}`, // TODO: improve
+			`{"message":"API rate limit exceeded"}` + "\n", // TODO: improve
 			nil,
 		},
 		{
@@ -157,7 +156,7 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"",
 			429,
 			`{"message":"API rate limit exceeded"}`,
-			`{"message":"API rate limit exceeded"}`,
+			`{"message":"API rate limit exceeded"}` + "\n",
 			nil,
 		},
 	}
@@ -177,7 +176,7 @@ func TestConfigCurrency_Request(t *testing.T) {
 			if status != tt.mockStatus {
 				t.Errorf("Request() status got = %v, want %v", status, tt.mockStatus)
 			}
-			if strings.TrimRight(message, "\n") != tt.wantMessage {
+			if message != tt.wantMessage {
 				t.Errorf("Request() message got = %v, want %v", message, tt.wantMessage)
 			}
 			if !reflect.DeepEqual(data, tt.wantData) {
