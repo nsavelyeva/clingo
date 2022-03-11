@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -37,7 +36,7 @@ func TestConfigJokes_Request(t *testing.T) {
 			"some_token",
 			200,
 			`{"joke": Ha-ha-ha."}`,
-			"Reading JSON from jokes response body failed: invalid character 'H' looking for beginning of value",
+			"Reading JSON from jokes response body failed: invalid character 'H' looking for beginning of value\n",
 			nil,
 		},
 		{
@@ -45,7 +44,7 @@ func TestConfigJokes_Request(t *testing.T) {
 			"some_token",
 			403,
 			`{"message":"You are not subscribed to this API."}`,
-			`{"message":"You are not subscribed to this API."}`,
+			"Jokes request responded with 403\n" + `{"message":"You are not subscribed to this API."}` + "\n",
 			nil,
 		},
 		{
@@ -53,7 +52,7 @@ func TestConfigJokes_Request(t *testing.T) {
 			"",
 			401,
 			`{"message":"Invalid API key. Go to https:\/\/docs.rapidapi.com\/docs\/keys for more info."}`,
-			`{"message":"Invalid API key. Go to https:\/\/docs.rapidapi.com\/docs\/keys for more info."}`,
+			"Jokes request responded with 401\n" + `{"message":"Invalid API key. Go to https:\/\/docs.rapidapi.com\/docs\/keys for more info."}` + "\n",
 			nil,
 		},
 	}
@@ -73,7 +72,7 @@ func TestConfigJokes_Request(t *testing.T) {
 			if status != tt.mockStatus {
 				t.Errorf("Request() status got = %v, want %v", status, tt.mockStatus)
 			}
-			if strings.TrimRight(message, "\n") != tt.wantMessage {
+			if message != tt.wantMessage {
 				t.Errorf("Request() message got = %v, want %v", message, tt.wantMessage)
 			}
 			if !reflect.DeepEqual(data, tt.wantData) {
@@ -173,7 +172,7 @@ func TestRun(t *testing.T) {
 			200,
 			"",
 			*mockData,
-			mockData.Joke,
+			mockData.Joke + "\n",
 		},
 		{
 			"ok with emoji (200 response)",
@@ -182,7 +181,7 @@ func TestRun(t *testing.T) {
 			200,
 			"",
 			*mockData,
-			fmt.Sprintf(":rolling_on_the_floor_laughing: %s", mockData.Joke),
+			fmt.Sprintf(":rolling_on_the_floor_laughing: %s\n", mockData.Joke),
 		},
 		{
 			"error output (non-200 response)",
@@ -191,7 +190,7 @@ func TestRun(t *testing.T) {
 			400,
 			"error 400",
 			*mockData,
-			"Error: error 400",
+			"Error: error 400\n",
 		},
 		{
 			"error output (0 response)",
@@ -200,7 +199,7 @@ func TestRun(t *testing.T) {
 			0,
 			"error 0",
 			*mockData,
-			"Error: error 0",
+			"Error: error 0\n",
 		},
 	}
 	for _, tt := range tests {

@@ -55,7 +55,7 @@ func (cj *ConfigJokes) Request() (int, string, *structs.ResponseJokes) {
 	//log.Printf("Jokes request responded with %s\n%s", resp.Status, string(body))
 
 	if resp.StatusCode != 200 {
-		return resp.StatusCode, string(body) + "\n", nil // TODO: return custom error message based on parsed body
+		return resp.StatusCode, fmt.Sprintf("Jokes request responded with %s\n%s\n", resp.Status, body), nil // TODO: return custom error message based on parsed body
 	}
 
 	var joke structs.ResponseJokes
@@ -73,12 +73,12 @@ func Run(out io.Writer, sj ServiceJokes, conf *ConfigJokes) error {
 	status, message, jokes := sj.Request()
 
 	if status == 200 {
-		output = jokes.Joke
+		output = jokes.Joke + "\n"
 		if conf.Emoji {
 			output = fmt.Sprintf(":rolling_on_the_floor_laughing: %s", output)
 		}
 	} else {
-		output = fmt.Sprintf("Error: %s", message)
+		output = fmt.Sprintf("Error: %s\n", message)
 	}
 	_, _ = fmt.Fprint(out, "", output)
 	return nil

@@ -98,7 +98,7 @@ func Run(out io.Writer, sw ServiceWeather) error {
 			weather.Current.WindDir, weather.Current.WindKph, ms,
 			weather.Current.PressureMb, weather.Current.Humidity, weather.Current.Uv)
 	} else {
-		output = fmt.Sprintf("Error: %s", message)
+		output = fmt.Sprintf("Error: %s\n", message)
 	}
 	_, _ = fmt.Fprint(out, "", output)
 	return nil
