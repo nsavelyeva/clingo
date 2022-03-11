@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -51,8 +52,8 @@ func (cw *ConfigCurrency) Request() (int, string, *structs.ResponseCurrency) {
 	if e2 != nil {
 		return resp.StatusCode, fmt.Sprintf("Failed to read currency response body: %s\n", e2), nil
 	}
-	//log.Printf("Currency request from currency %s to currency %s responded with %s\n%s",
-	//	cw.From, cw.To, resp.Status, string(body))
+	log.Printf("Currency request from currency %s to currency %s responded with %s\n%s",
+		cw.From, cw.To, resp.Status, string(body))
 
 	if resp.StatusCode != 200 {
 		return resp.StatusCode, string(body) + "\n", nil // TODO: return custom error message based on parsed body
