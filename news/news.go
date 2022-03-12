@@ -77,11 +77,11 @@ func Run(out io.Writer, sn ServiceNews, conf *ConfigNews) error {
 	i := 0 // to control limit explicitly since in news API page and pageSize parameters do not take effect.
 	if status == 200 {
 		for _, a := range news.Articles {
-			i += 1
+			i++
 			if conf.Markup {
-				output += fmt.Sprintf("[link](%s) %s\n>%s\n", a.Url, a.Title, a.Description)
+				output += fmt.Sprintf("[link](%s) %s\n>%s\n", a.URL, a.Title, a.Description)
 			} else {
-				output += fmt.Sprintf("%s\n%s\nMore at %s\n\n", a.Title, a.Description, a.Url)
+				output += fmt.Sprintf("%s\n%s\nMore at %s\n\n", a.Title, a.Description, a.URL)
 			}
 			if i == conf.Limit {
 				break

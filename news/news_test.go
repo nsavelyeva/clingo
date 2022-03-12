@@ -32,8 +32,8 @@ func TestConfigNews_Request(t *testing.T) {
 			`{"totalResults":2,"articles":[{"title":"title 0","description":"description 0","url":"https://url0..."},{"title":"title 1","description":"description 1","url":"https://url1..."}]}`,
 			"",
 			&structs.ResponseNews{TotalResults: 2, Articles: []structs.Article{
-				{Title: "title 0", Description: "description 0", Url: "https://url0..."},
-				{Title: "title 1", Description: "description 1", Url: "https://url1..."},
+				{Title: "title 0", Description: "description 0", URL: "https://url0..."},
+				{Title: "title 1", Description: "description 1", URL: "https://url1..."},
 			}},
 		},
 		{
@@ -177,21 +177,21 @@ func TestNewServiceNews(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	articles := []structs.Article{
-		{Title: "title 0", Description: "description 0", Url: "url 0"},
-		{Title: "title 1", Description: "description 1", Url: "url 1"},
-		{Title: "title 2", Description: "description 2", Url: "url 2"},
+		{Title: "title 0", Description: "description 0", URL: "url 0"},
+		{Title: "title 1", Description: "description 1", URL: "url 1"},
+		{Title: "title 2", Description: "description 2", URL: "url 2"},
 	}
 
 	allArticlesText := "title 0\ndescription 0\nMore at url 0\n\ntitle 1\ndescription 1\nMore at url 1\n\ntitle 2\ndescription 2\nMore at url 2\n\n"
-    allArticlesMarkup := "[link](url 0) title 0\n>description 0\n[link](url 1) title 1\n>description 1\n[link](url 2) title 2\n>description 2\n"
+	allArticlesMarkup := "[link](url 0) title 0\n>description 0\n[link](url 1) title 1\n>description 1\n[link](url 2) title 2\n>description 2\n"
 
 	tests := []struct {
-		name         string
-		conf         *ConfigNews
-		mockStatus   int
-		mockMessage  string
-		mockData     *structs.ResponseNews
-		wantOut      string
+		name        string
+		conf        *ConfigNews
+		mockStatus  int
+		mockMessage string
+		mockData    *structs.ResponseNews
+		wantOut     string
 	}{
 		{
 			"ok without markup (200 response)",

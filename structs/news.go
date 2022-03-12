@@ -15,14 +15,14 @@ type Article struct {
 	Author      string    `json:"author"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	Url         string    `json:"url"`
-	UrlToImage  string    `json:"urlToImage"`
+	URL         string    `json:"url"`
+	URLToImage  string    `json:"urlToImage"`
 	PublishedAt time.Time `json:"publishedAt"`
 	Content     string    `json:"content"`
 }
 
 // Source is a sub-struct of Article struct
 type Source struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
