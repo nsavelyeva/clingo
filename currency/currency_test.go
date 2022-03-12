@@ -273,6 +273,7 @@ func TestRun(t *testing.T) {
 			EUR: 1.50,
 		},
 	}
+	var nilMockData structs.ResponseCurrency
 
 	tests := []struct {
 		name         string
@@ -304,7 +305,7 @@ func TestRun(t *testing.T) {
 			"validation error",
 			400,
 			"",
-			*mockData,
+			nilMockData,
 			"validation error\n",
 		},
 		{
@@ -315,7 +316,7 @@ func TestRun(t *testing.T) {
 			"validation error",
 			400,
 			"",
-			*mockData,
+			nilMockData,
 			"validation error\n",
 		},
 	}
@@ -323,7 +324,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cs := test.NewServiceCurrencyMock(tt.from, tt.to, tt.token)
 			cs.On("Request").Return(tt.mockStatus, tt.mockMessage, &tt.mockData)
-			cs.On("GetRate", &tt.mockData, "EUR").Return(tt.mockData.Data.EUR)
+			cs.On("GetRate", &tt.mockData, "EUR").Return(1.5)
 			cs.On("GetCurrenciesInfo").Return(details)
 			cs.On("ValidateInputs", details, tt.to, tt.from).Return(tt.mockValidate)
 
