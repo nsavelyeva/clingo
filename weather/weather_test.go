@@ -228,7 +228,7 @@ func TestRun(t *testing.T) {
 		mockEmoji   string
 		mockStatus  int
 		mockMessage string
-		mockData    structs.ResponseWeather
+		mockData    *structs.ResponseWeather
 		wantOut     string
 	}{
 		{
@@ -238,7 +238,7 @@ func TestRun(t *testing.T) {
 			":clingo_weather:",
 			200,
 			"",
-			*mockData,
+			mockData,
 			"city: :clingo_weather: mock weather, t 1.0C (feels like 0.1C), wind N 5.00 km/h (1.4 m/s), pressure 11.2 mb, humidity 90, UV 3.0\n",
 		},
 		{
@@ -248,7 +248,7 @@ func TestRun(t *testing.T) {
 			"",
 			400,
 			"error 400",
-			*mockData,
+			nil,
 			"Error: error 400\n",
 		},
 		{
@@ -258,14 +258,14 @@ func TestRun(t *testing.T) {
 			"",
 			0,
 			"error 0",
-			*mockData,
+			nil,
 			"Error: error 0\n",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ws := test.NewServiceWeatherMock(tt.city, tt.token)
-			ws.On("Request").Return(tt.mockStatus, tt.mockMessage, &tt.mockData)
+			ws.On("Request").Return(tt.mockStatus, tt.mockMessage, tt.mockData)
 			ws.On("GetEmoji", mockData.Current.Condition.Code).Return(tt.mockEmoji)
 
 			out := &bytes.Buffer{}

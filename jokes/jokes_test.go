@@ -62,7 +62,7 @@ func TestConfigJokes_Request(t *testing.T) {
 			defer httpmock.DeactivateAndReset()
 			httpmock.RegisterResponder(
 				"GET",
-				fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
+				fmt.Sprintf("%s/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
 				httpmock.NewBytesResponder(tt.mockStatus, []byte(tt.mockBody)),
 			)
 
@@ -96,7 +96,7 @@ func TestConfigJokes_RequestErrorHTTP(t *testing.T) {
 			"http error",
 			"some error",
 			0,
-			fmt.Sprintf("Jokes request failed: Get \"%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist\": some error\n", constants.JokesBaseURL),
+			fmt.Sprintf("Jokes request failed: Get \"%s/Any?format=json&type=single&blacklistFlags=nsfw,racist\": some error\n", constants.JokesBaseURL),
 			nil,
 		},
 	}
@@ -106,7 +106,7 @@ func TestConfigJokes_RequestErrorHTTP(t *testing.T) {
 			defer httpmock.DeactivateAndReset()
 			httpmock.RegisterResponder(
 				"GET",
-				fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
+				fmt.Sprintf("%s/Any?format=json&type=single&blacklistFlags=nsfw,racist", constants.JokesBaseURL),
 				httpmock.NewErrorResponder(errors.New(tt.mockError)),
 			)
 
@@ -162,7 +162,7 @@ func TestRun(t *testing.T) {
 		mockEmoji   bool
 		mockStatus  int
 		mockMessage string
-		mockData    structs.ResponseJokes
+		mockData    *structs.ResponseJokes
 		wantOut     string
 	}{
 		{
@@ -171,7 +171,7 @@ func TestRun(t *testing.T) {
 			false,
 			200,
 			"",
-			*mockData,
+			mockData,
 			mockData.Joke + "\n",
 		},
 		{
@@ -180,7 +180,7 @@ func TestRun(t *testing.T) {
 			true,
 			200,
 			"",
-			*mockData,
+			mockData,
 			fmt.Sprintf(":rolling_on_the_floor_laughing: %s\n", mockData.Joke),
 		},
 		{
@@ -189,7 +189,7 @@ func TestRun(t *testing.T) {
 			false,
 			400,
 			"error 400",
-			*mockData,
+			nil,
 			"Error: error 400\n",
 		},
 		{
@@ -198,14 +198,14 @@ func TestRun(t *testing.T) {
 			false,
 			0,
 			"error 0",
-			*mockData,
+			nil,
 			"Error: error 0\n",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			js := test.NewServiceJokesMock(tt.token)
-			js.On("Request").Return(tt.mockStatus, tt.mockMessage, &tt.mockData)
+			js.On("Request").Return(tt.mockStatus, tt.mockMessage, tt.mockData)
 
 			conf := ConfigJokes{Emoji: tt.mockEmoji, Token: tt.token}
 			out := &bytes.Buffer{}

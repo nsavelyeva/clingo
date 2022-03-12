@@ -74,6 +74,7 @@ type Data struct {
 	MAD float64 `json:"MAD"`
 	OMR float64 `json:"OMR"`
 	CUC float64 `json:"CUC"`
+	BYN float64 `json:"BYN"`
 	BYR float64 `json:"BYR"`
 	AZN float64 `json:"AZN"`
 	LKR float64 `json:"LKR"`

@@ -27,9 +27,10 @@ func NewServiceJokes(token string) *ServiceJokes {
 	return &conf
 }
 
-// Request is a method to send the HTTP call to the 3rd party jokes API
+// Request is a method to send the HTTP call to the 3rd party jokes API.
+// Returns HTTP response status code (if available), error message or empty string, jokes data structure or nil.
 func (cj *ConfigJokes) Request() (int, string, *structs.ResponseJokes) {
-	jokesURL := fmt.Sprintf("%s/joke/Any?format=json&type=single&blacklistFlags=nsfw,racist",
+	jokesURL := fmt.Sprintf("%s/Any?format=json&type=single&blacklistFlags=nsfw,racist",
 		constants.JokesBaseURL)
 	req, e1 := http.NewRequest("GET", jokesURL, nil)
 	if e1 != nil {

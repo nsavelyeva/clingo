@@ -15,29 +15,56 @@ but to make it work in Alpine docker image you will have to execute the followin
 CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o clingo main.go
 ```
 
-To run unit tests:
+Run unit tests:
 ```
 go test ./...
 ```
 
-To request information about current weather in a certain city, use:
+#### Weather
+Request information about current weather in a certain city, use:
 ```
 ./clingo weather --city Amsterdam --token $WEATHER_API_TOKEN
 ```
 
-To request information about currency rate for the given currency using specified base, execute:
+#### Currency
+Request information about currency rate for the given currency using specified base, execute:
 ```
-./clingo currency --from EUR --to USD,BYR,RUB,PLN --token $CURRENCY_API_TOKEN
+./clingo currency --from EUR --to USD,BYN,RUB,PLN --token $CURRENCY_API_TOKEN
 ```
 
-To print a short joke, run:
+#### Jokes
+Print a short joke, run:
 ```
 ./clingo jokes --token $JOKES_API_TOKEN
 ```
 
-To see if there is an [upcoming] event according to the provided JSON file, run:
+#### News
+Read top news, execute:
+```
+./clingo news --language=nl --sources=rtl-nieuws --from=2022-03-10 --limit=10 --token $NEWS_API_TOKEN
+```
+_Note._
+<br>It seems like providing `pageSize` and `page` parameters in the HTTP GET request
+does not have any effect (10 is always a limit).
+<br>Hence, it makes sense to keep parameters in the query in case news API will start working
+as described at https://newsapi.org/docs/endpoints/top-headlines even for free accounts.
+<br>Thus, the limit has the maximum value of 10.
+
+#### Events
+See if there is an [upcoming] event according to the provided JSON file, run:
 ```
 ./clingo --events events.json
+```
+The content of `events.json` is as follows:
+```
+{
+  <Format (lines are sorted ascending in calendar year)>
+  "<MM(month)>-<DD(day)>": {"year": YYYY, "remind": <integer N or 0>, "type": "<anniversary|birthday|holiday>", "event": "<Description>"},
+  ... <Examples> ...
+  "01-05": {"year": 2010, "remind": 1, "type": "anniversary", "event": "Someone's anniversary"},
+  "02-15": {"year": 2000, "remind": 3, "type": "birthday", "event": "Someone's birthday"},
+  "12-25": {"year":    1, "remind": 0, "type": "holiday", "event": "Catholic Christmas Day"},
+}
 ```
 
 ## TODO
