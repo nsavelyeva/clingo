@@ -79,7 +79,7 @@ func Run(out io.Writer, sn ServiceNews, conf *ConfigNews) error {
 		for _, a := range news.Articles {
 			i++
 			if conf.Markup {
-				output += fmt.Sprintf("[link](%s) %s\n>%s\n", a.URL, a.Title, a.Description)
+				output += fmt.Sprintf("<%s|link> %s\n>%s\n", a.URL, a.Title, a.Description)
 			} else {
 				output += fmt.Sprintf("%s\n%s\nMore at %s\n\n", a.Title, a.Description, a.URL)
 			}

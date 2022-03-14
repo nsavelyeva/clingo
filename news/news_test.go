@@ -183,7 +183,7 @@ func TestRun(t *testing.T) {
 	}
 
 	allArticlesText := "title 0\ndescription 0\nMore at url 0\n\ntitle 1\ndescription 1\nMore at url 1\n\ntitle 2\ndescription 2\nMore at url 2\n\n"
-	allArticlesMarkup := "[link](url 0) title 0\n>description 0\n[link](url 1) title 1\n>description 1\n[link](url 2) title 2\n>description 2\n"
+	allArticlesMarkup := "<url 0|link> title 0\n>description 0\n<url 1|link> title 1\n>description 1\n<url 2|link> title 2\n>description 2\n"
 
 	tests := []struct {
 		name        string
