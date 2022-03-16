@@ -25,18 +25,24 @@ Request information about current weather in a certain city, use:
 ```
 ./clingo weather --city Amsterdam --token $WEATHER_API_TOKEN
 ```
+_Note._
+According to https://weatherapi.com, current limitations for free account are 1,000,000 requests/month.
 
 #### Currency
 Request information about currency rate for the given currency using specified base, execute:
 ```
 ./clingo currency --from EUR --to USD,BYN,RUB,PLN --token $CURRENCY_API_TOKEN
 ```
+_Note._
+According to https://currencyapi.com, current limitations for free account are 300 requests/month (10 requests/minute).
 
 #### Jokes
 Print a short joke, run:
 ```
 ./clingo jokes --token $JOKES_API_TOKEN
 ```
+_Note._
+According to https://rapidapi.com and https://jokeapi.dev, current limitations are 120 requests/minute.
 
 #### News
 Read top news, execute:
@@ -49,6 +55,8 @@ does not have any effect (10 is always a limit).
 <br>Hence, it makes sense to keep parameters in the query in case news API will start working
 as described at https://newsapi.org/docs/endpoints/top-headlines even for free accounts.
 <br>Thus, the limit has the maximum value of 10.
+
+According to https://newsapi.org, current limitations for free (developer) account are 100 requests/day.
 
 #### Events
 See if there is an [upcoming] event according to the provided JSON file, run:
