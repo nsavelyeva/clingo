@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -52,8 +51,8 @@ func (cw *ConfigCurrency) Request() (int, string, *structs.ResponseCurrency) {
 	if e2 != nil {
 		return resp.StatusCode, fmt.Sprintf("Failed to read currency response body: %s\n", e2), nil
 	}
-	log.Printf("Currency request from currency %s to currency %s responded with %s\n%s",
-		cw.From, cw.To, resp.Status, string(body))
+	//log.Printf("Currency request from currency %s to currency %s responded with %s\n%s",
+	//	cw.From, cw.To, resp.Status, string(body))
 
 	if resp.StatusCode != 200 {
 		return resp.StatusCode, string(body) + "\n", nil // TODO: return custom error message based on parsed body
@@ -99,12 +98,13 @@ func (cw *ConfigCurrency) ValidateInputs(details map[string]structs.DetailsCurre
 // i.e. not as a property because property value is unknown (dynamic).
 // If the currency does not present, return 0 rate.
 func (cw *ConfigCurrency) GetRate(rc *structs.ResponseCurrency, field string) float64 {
-	r := reflect.ValueOf(rc.Data)
-	f := reflect.Indirect(r).FieldByName(field)
-	if !f.IsValid() {
+	d := reflect.ValueOf(rc.Data)
+	c := reflect.Indirect(d).FieldByName(field)
+	if !c.IsValid() {
 		return float64(0)
 	}
-	return f.Float()
+	r := reflect.Indirect(c).FieldByName("Value").Float()
+	return r
 }
 
 // Run is a function to send an HTTP request to 3rd party Currency API and print the summary in case of success

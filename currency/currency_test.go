@@ -17,9 +17,9 @@ import (
 func Test_GetRate(t *testing.T) {
 	responseData := &structs.ResponseCurrency{
 		Data: &structs.Data{
-			USD: 1.00,
-			RUB: 0.30,
-			EUR: 1.50,
+			USD: &structs.Rate{Value: 1.00},
+			RUB: &structs.Rate{Value: 0.30},
+			EUR: &structs.Rate{Value: 1.50},
 		},
 	}
 
@@ -95,9 +95,9 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"usd",
 			"some_token",
 			200,
-			`{"data":{"USD":0.359306}}`,
+			`{"data":{"USD":{"value":0.359306}}}`,
 			"",
-			&structs.ResponseCurrency{Data: &structs.Data{USD: 0.359306}},
+			&structs.ResponseCurrency{Data: &structs.Data{USD: &structs.Rate{Value: 0.359306}}},
 		},
 		{
 			"ok: base currency in small letters",
@@ -105,9 +105,9 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"usd,rub,eur",
 			"some_token",
 			200,
-			`{"data":{"USD":0.359306,"RUB":0.112025,"EUR":1.0}}`,
+			`{"data":{"USD":{"value":0.359306},"RUB":{"value":0.112025},"EUR":{"value":1.0}}}`,
 			"",
-			&structs.ResponseCurrency{Data: &structs.Data{USD: 0.359306, RUB: 0.112025, EUR: 1.0}},
+			&structs.ResponseCurrency{Data: &structs.Data{USD: &structs.Rate{Value: 0.359306}, RUB: &structs.Rate{Value: 0.112025}, EUR: &structs.Rate{Value: 1.0}}},
 		},
 		{
 			"go error (bad json)",
@@ -135,9 +135,9 @@ func TestConfigCurrency_Request(t *testing.T) {
 			"usd",
 			"some_token",
 			200,
-			`{"data":{"USD":1.0,"RUB":0.112025,"EUR":0.359306}}`,
+			`{"data":{"USD":{"value":1.0},"RUB":{"value":0.112025},"EUR":{"value":0.359306}}}`,
 			"",
-			&structs.ResponseCurrency{Data: &structs.Data{EUR: 0.359306, RUB: 0.112025, USD: 1.0}},
+			&structs.ResponseCurrency{Data: &structs.Data{EUR: &structs.Rate{Value: 0.359306}, RUB: &structs.Rate{Value: 0.112025}, USD: &structs.Rate{Value: 1.0}}},
 		},
 		{
 			"unauthorized (wrong token value)",
@@ -268,9 +268,9 @@ func TestRun(t *testing.T) {
 
 	mockData := &structs.ResponseCurrency{
 		Data: &structs.Data{
-			USD: 1.00,
-			RUB: 0.30,
-			EUR: 1.50,
+			USD: &structs.Rate{Value: 1.00},
+			RUB: &structs.Rate{Value: 0.30},
+			EUR: &structs.Rate{Value: 1.50},
 		},
 	}
 	var nilMockData structs.ResponseCurrency
