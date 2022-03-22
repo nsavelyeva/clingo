@@ -20,7 +20,7 @@ on:
 
 jobs:
   push_to_registry:
-    name: Push Docker image to BEAT's Harbor
+    name: Push Docker image
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
